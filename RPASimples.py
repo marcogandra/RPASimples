@@ -4,6 +4,8 @@ from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
+import logging
+import logging.config
 
 """[summary]
 
@@ -18,16 +20,19 @@ class robo():
     _titulo_dialogos: str = "SISTEMA RPA"
     _navegador: any
     _nome: str
+    _log: any
 
     processo: str
     log: str
     pathvoz: str = './voz/'
     pathvoz_apresentacao = '../apresentacao/'
     path_webdriver: str = '../webdriver/'
-    pathlog: str
+    pathlog: str = './LOG/'
     voz: any
 
     def __init__(self, nome):
+        self._log = logging.basicConfig(
+            filename=f'{self.pathlog}RPA.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s')
         agora = self._agora()
         self._nome = nome
         self.pathlog = f'./{agora}_log/'
@@ -41,11 +46,14 @@ class robo():
             self._falante = False
 
     def abrir_navegador(self, url: str):
+        self.set_mensagem("Abrir navegador")
         chrome_options = Options()
         chrome_options.add_experimental_option(
             'excludeSwitches', ['enable-logging'])
         chrome_options.add_argument('--lang=pr-BR')
         chrome_options.add_argument('--disable-notifications')
+        chrome_options.add_experimental_option(
+            "excludeSwitches", ['enable-automation'])
 
         drive = f'{self.path_webdriver}chromedriver.exe'
         self._navegador = webdriver.Chrome(
@@ -60,12 +68,15 @@ class robo():
     def fechar_navegador(self):
         gui.press("F11")
         self._navegador.close()
+        self.set_mensagem("Navegador fechado")
 
     def abrir_link(self, url: str):
         self._navegador.get(url)
+        self.set_mensagem(f"Link acessado: {url}")
 
     def click_elemento_web(self, xpath: str) -> any:
         elemento = self._navegador.find_element_by_xpath(xpath).click()
+        self.set_mensagem(f"Elemento acessado xPath: {xpath}")
         return elemento
 
     def entrar_dados_elemento_web(
@@ -78,7 +89,8 @@ class robo():
             elemento.send_keys(Keys.RETURN)
         if key_tab:
             elemento.send_keys(Keys.TAB)
-
+        self.set_mensagem(
+            f"Entrada de dados elemento: {xpath} | valor: {dados}")
         return elemento
 
     def set_mensagem(self, texto: str):
@@ -96,7 +108,7 @@ class robo():
     def _gravar_log(self):
         agora = self._agora()
         txt_log = f"{agora} | {self._mensagem}"
-        print(txt_log)
+        self._log.info(txt_log)
 
     def _interacao(self, envento: str):
         hora = datetime.now()
@@ -139,9 +151,6 @@ class robo():
         self._interacao("ATENCAO")
         gui.alert(text=self._mensagem,
                   title=self._titulo_dialogos, button='OK')
-
-    def log(self):
-        pass
 
     def trabalho_concluido(self):
         self.set_mensagem("Mensagem de Alerta")
