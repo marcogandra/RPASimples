@@ -21,6 +21,8 @@ class robo():
     processo: str
     log: str
     pathvoz: str = './voz/'
+    pathvoz_apresentacao = '../apresentacao/'
+    path_webdriver: str = '../webdriver/'
     pathlog: str
     voz: any
 
@@ -108,7 +110,7 @@ class robo():
                 else:
                     playsound(self.pathvoz+'boanoite.mp3')
 
-                playsound(self.pathvoz+'apresentacao.mp3')
+                playsound(self.pathvoz_apresentacao+'apresentacao.mp3')
 
     def apresentacao(self):
         self.set_mensagem("Apresentação")
