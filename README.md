@@ -1,2 +1,2 @@
 # RPASimples
-Classe que abstrai comandos para um RPA - programando propositalmente em PT-BR
+Classe que abstrai comandos para um RPA - programado propositalmente em PT-BR
