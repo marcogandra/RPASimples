@@ -1,6 +1,6 @@
 .vscode
 venv
-init.ipynb
+*.ipynb
 *.sqlite3
 *.pyc
 *.py[code]
