@@ -1,0 +1,4 @@
+Instalar WEBDRIVER CRHOME (chromedriver):
+https://chromedriver.chromium.org/downloads
+Após descompactar salvar o arquivo no local onde está instalado o python.exe
+

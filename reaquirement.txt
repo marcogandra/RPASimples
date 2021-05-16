@@ -1,0 +1,14 @@
+MouseInfo==0.1.3
+Pillow==8.2.0
+playsound==1.2.2
+PyAutoGUI==0.9.52
+PyGetWindow==0.0.9
+PyMsgBox==1.0.9
+pyperclip==1.8.2
+PyRect==0.1.4
+PyScreeze==0.1.27
+PyTweening==1.0.3
+rpa==1.34.0
+selenium==3.141.0
+tagui==1.34.0
+urllib3==1.26.4
