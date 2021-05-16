@@ -3,6 +3,7 @@ from playsound import playsound
 from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.chrome.options import Options
 
 """[summary]
 
@@ -40,7 +41,16 @@ class robo():
             self._falante = False
 
     def abrir_navegador(self, url: str):
-        self._navegador = webdriver.Chrome()
+        chrome_options = Options()
+        chrome_options.add_experimental_option(
+            'excludeSwitches', ['enable-logging'])
+        chrome_options.add_argument('--lang=pr-BR')
+        chrome_options.add_argument('--disable-notifications')
+
+        drive = f'{self.path_webdriver}chromedriver.exe'
+        self._navegador = webdriver.Chrome(
+            executable_path=drive,
+            options=chrome_options)
         self._navegador.get(url)
         gui.press("F11")
         x, y = gui.size()
