@@ -4,8 +4,9 @@ from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
-import logging
-import logging.config
+from colorama import Fore, Back, Style
+#import logging
+#import logging.config
 
 """[summary]
 
@@ -31,11 +32,16 @@ class robo():
     voz: any
 
     def __init__(self, nome):
-        self._log = logging.basicConfig(
-            filename=f'{self.pathlog}RPA.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s')
-        agora = self._agora()
+        agora = datetime.now()
+        agora = agora.strftime("%d_%m_%Y__%H_%M")
+        #arquivo = f'{self.pathlog}RPA_{agora}.log'
+        #logging.basicConfig(filename=arquivo, format='%(asctime)s %(message)s',filemode='w')
+        #self._log = logging.getLogger()
+        #self._log.info(f"{agora}: Inicio")
+        print(Fore.RED + 'iniciando...')
+
         self._nome = nome
-        self.pathlog = f'./{agora}_log/'
+
         self.set_mensagem("RPA ativado")
         assistencia = gui.confirm(text=f'Deseja manter a assistência por voz da {self._nome}?',
                                   title=f"{self._titulo_dialogos} - {nome}", buttons=['Sim', 'Não'])
@@ -108,7 +114,7 @@ class robo():
     def _gravar_log(self):
         agora = self._agora()
         txt_log = f"{agora} | {self._mensagem}"
-        self._log.info(txt_log)
+        #self._log.info(txt_log)
 
     def _interacao(self, envento: str):
         hora = datetime.now()
