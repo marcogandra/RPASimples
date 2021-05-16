@@ -142,22 +142,3 @@ class robo():
 
     def tecla_gui(self, tecla):
         gui.press(tecla)
-
-
-luzbot = robo("Luzbot")
-#luzbot.set_titulo_dialogos("RPA DARF")
-# luzbot.apresentacao()
-luzbot.abrir_navegador(
-    "https://depositojudicial.caixa.gov.br/sigsj_internet/principal.xhtml")
-gui.alert("x")
-luzbot.click_elemento_web('//*[@id="tipoJusticaDeposito"]')
-luzbot.tecla_gui("DOWN")
-luzbot.tecla_gui("DOWN")
-luzbot.tecla_gui("ENTER")
-luzbot.click_elemento_web(
-    '//*[@id="btnConfirmarDepositosJudiciais"]')
-luzbot.click_elemento_web(
-    '//*[@id="j_id45:filtroView:j_id47:tpDeposito1"]/tbody/tr/td/span/span/img')
-luzbot.click_elemento_web(
-    '//*[@id="j_id45:filtroView:j_id47:btnConfirmar"]/img')
-luzbot.fechar_navegador()
