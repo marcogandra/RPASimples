@@ -4,7 +4,12 @@ from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
-from colorama import Fore, Back, Style
+import sys
+from win32api import GetKeyState
+from win32con import VK_CAPITAL
+import time
+import unicodedata
+
 #import logging
 #import logging.config
 
@@ -25,20 +30,31 @@ class robo():
 
     processo: str
     log: str
-    pathvoz: str = './voz/'
-    pathvoz_apresentacao = '../apresentacao/'
-    path_webdriver: str = '../webdriver/'
+    pathvoz: str = './RPASimples/voz/'
+    pathvoz_apresentacao: str
+    path_webdriver: str
     pathlog: str = './LOG/'
     voz: any
 
-    def __init__(self, nome):
+    def __init__(self, nome: str, resolucao_x: int, resolucao_y: int, pathvoz_apresentacao: str, path_webdriver):
+        self.pathvoz_apresentacao = pathvoz_apresentacao
+        self.path_webdriver = path_webdriver
+
+        screenX, screenY = gui.size()
+        if (screenX != resolucao_x or screenY != resolucao_y) and (resolucao_x != 0 and screenY != 0):
+            gui.alert(
+                f"Resolução do monitor não é compatível com este RPA ({resolucao_x} x {resolucao_y}) ")
+            sys.exit()  # Fianliza o RPA
+
+        gui.pause = 1
+        capslock = GetKeyState(VK_CAPITAL)
+
+        if capslock != 0:
+            # Caso o capslock estiver ativo, ele será desligado
+            gui.press('capslock')
+
         agora = datetime.now()
         agora = agora.strftime("%d_%m_%Y__%H_%M")
-        #arquivo = f'{self.pathlog}RPA_{agora}.log'
-        #logging.basicConfig(filename=arquivo, format='%(asctime)s %(message)s',filemode='w')
-        #self._log = logging.getLogger()
-        #self._log.info(f"{agora}: Inicio")
-        print(Fore.RED + 'iniciando...')
 
         self._nome = nome
 
@@ -50,6 +66,20 @@ class robo():
             self._falante = True
         else:
             self._falante = False
+
+        self.set_mensagem("Apresentação")
+        self._interacao("APRESENTACAO")
+        mensagem = """ATENÇÃO!!!  INICIANDO O RPA DE LANÇAMENTO {nome}
+        VOCÊ TERÁ 10 SEGUNDOS PARA SE PREPARAR E USAR O COMPUTADOR ATÉ O FINAL DA EXECUÇÃO"""
+        self.set_mensagem(mensagem)
+
+        gui.alert(text=self._mensagem,
+                  title=self._titulo_dialogos, button='OK')
+        self.set_mensagem("Iniciando o processo")
+        self.espera(10)
+
+    def espera(self, segundos: int):
+        time.sleep(segundos)
 
     def abrir_navegador(self, url: str):
         self.set_mensagem("Abrir navegador")
@@ -70,6 +100,7 @@ class robo():
         x, y = gui.size()
         gui.moveTo(x-15, 15)
         gui.click()
+        self.espera(3)
 
     def fechar_navegador(self):
         gui.press("F11")
@@ -114,7 +145,7 @@ class robo():
     def _gravar_log(self):
         agora = self._agora()
         txt_log = f"{agora} | {self._mensagem}"
-        #self._log.info(txt_log)
+        # self._log.info(txt_log)
 
     def _interacao(self, envento: str):
         hora = datetime.now()
@@ -140,14 +171,6 @@ class robo():
 
                 playsound(self.pathvoz_apresentacao+'apresentacao.mp3')
 
-    def apresentacao(self):
-        self.set_mensagem("Apresentação")
-        self._interacao("APRESENTACAO")
-        self.set_mensagem("Mensagem de Alerta")
-        gui.alert(text=self._mensagem,
-                  title=self._titulo_dialogos, button='OK')
-        self.set_mensagem("Iniciando o processo")
-
     def erro(self):
         self._interacao("ERRO")
         gui.alert(text=self._mensagem,
@@ -169,3 +192,13 @@ class robo():
 
     def tecla_gui(self, tecla):
         gui.press(tecla)
+
+    def remover_acentos_caracteres_especiais(palavra):
+
+        # Unicode normalize transforma um caracter em seu equivalente em latin.
+        nfkd = unicodedata.normalize('NFKD', palavra)
+        palavraSemAcento = u"".join(
+            [c for c in nfkd if not unicodedata.combining(c)])
+
+        # Usa expressão regular para retornar a palavra apenas com números, letras e espaço
+        return str(re.sub('[^a-zA-Z0-9 \\\]', '', palavraSemAcento))
