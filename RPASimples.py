@@ -29,6 +29,7 @@ class robo():
     _navegador: any
     _nome: str
     _log: any
+    _dir_saida: str
 
     processo: str
     log: str
@@ -37,8 +38,13 @@ class robo():
     path_webdriver: str
     pathlog: str = './LOG/'
     voz: any
+    arquivo_log: any
 
-    def __init__(self, nome: str, resolucao_x: int, resolucao_y: int, pathvoz_apresentacao: str, path_webdriver):
+    def __init__(self, nome: str, resolucao_x: int,
+                 resolucao_y: int, pathvoz_apresentacao: str,
+                 path_webdriver, dir_saida: str = "./",
+                 nome_processo: str = ""):
+
         self.pathvoz_apresentacao = pathvoz_apresentacao
         self.path_webdriver = path_webdriver
 
@@ -55,12 +61,18 @@ class robo():
             # Caso o capslock estiver ativo, ele será desligado
             gui.press('capslock')
 
-        agora = datetime.now()
-        agora = agora.strftime("%d_%m_%Y__%H_%M")
-
         self._nome = nome
+        self._dir_saida = dir_saida
 
-        self.set_mensagem("RPA ativado")
+        self.dir_arquivo_log = self._dir_saida + \
+            f"//ARQUIVO_LOG_RPA_PROCESSO_{nome_processo}.txt"
+
+        self.arquivo_log = open(self.dir_arquivo_log, "w")
+        linha = f"Arquivo de logging processo {self._nome}\n"
+        self.arquivo_log.write(linha)
+        self.arquivo_log.close()
+
+        self.set_mensagem("\n\nRPA ativado")
         assistencia = gui.confirm(text=f'Deseja manter a assistência por voz da {self._nome}?',
                                   title=f"{self._titulo_dialogos} - {nome}", buttons=['Sim', 'Não'])
 
@@ -81,7 +93,17 @@ class robo():
         self.espera(10)
 
     def espera(self, segundos: int):
+        self.set_mensagem("Espera "+str(segundos))
         time.sleep(segundos)
+
+    def salvar_tela(self, nome_arquivo):
+        self.set_mensagem("Print tela")
+        tela = gui.screenshot(nome_arquivo)
+        return tela
+
+    def rolagem_tela(self, rodadas: int):
+        self.set_mensagem("Rolagem de tela "+str(rodadas))
+        gui.scroll(rodadas)
 
     def abrir_navegador(self, url: str):
         self.set_mensagem("Abrir navegador")
@@ -106,25 +128,29 @@ class robo():
 
     def fechar_navegador(self):
         gui.press("F11")
+        # gui.hotkey('alt', 'f4')
         self._navegador.close()
+        self._navegador.quit()
         self.set_mensagem("Navegador fechado")
 
     def abrir_link(self, url: str):
         self._navegador.get(url)
         self.set_mensagem(f"Link acessado: {url}")
 
-    def escreva_gui(self, texto:str):        
+    def escreva_gui(self, texto: str):
+        self.set_mensagem("Escrevendo: "+texto)
         gui.typewrite(texto, interval=0.1)
 
-    def click_elemento_web(self, xpath: str = "", nome_do_elemento : str = "") -> any:
+    def click_elemento_web(self, xpath: str = "", nome_do_elemento: str = "") -> any:
         if xpath != "":
             elemento = self._navegador.find_element_by_xpath(xpath).click()
             self.set_mensagem(f"Elemento acessado xPath: {xpath}")
         elif nome_do_elemento != "":
-            elemento = self._navegador.find_element_by_name(nome_do_elemento).click()
-            self.set_mensagem(f"Elemento acessado xPath: {xpath}")            
+            elemento = self._navegador.find_element_by_name(
+                nome_do_elemento).click()
+            self.set_mensagem(f"Elemento acessado xPath: {xpath}")
         else:
-             self.set_mensagem(f"Elemento sem XPATH ou Nome")   
+            self.set_mensagem(f"Elemento sem XPATH ou Nome")
         return elemento
 
     def combo_box_web(self, nome_do_elemento: str, texto_opcao_selecionada: str):
@@ -165,8 +191,15 @@ class robo():
 
     def _gravar_log(self):
         agora = self._agora()
-        txt_log = f"{agora} | {self._mensagem}"
-        # self._log.info(txt_log)
+        txt_log = f"{agora} | {self._mensagem}\n"
+
+        self.arquivo_log = open(self.dir_arquivo_log, "a")
+        self.arquivo_log.write(txt_log)
+        self.arquivo_log.close()
+
+    def bip(self, repetir):
+        for i in range(repetir):
+            playsound(self.pathvoz+'bip.mp3')
 
     def _interacao(self, envento: str):
         hora = datetime.now()
@@ -216,7 +249,8 @@ class robo():
         gui.alert(text=self._mensagem,
                   title=self._titulo_dialogos, button='OK')
 
-    def tecla_gui(self, tecla):
+    def tecla_gui(self, tecla: str):
+        self.set_mensagem("Tecla pressionada "+tecla)
         gui.press(tecla)
 
     def processar_conjuto_de_campos_web(self, campos: list):
