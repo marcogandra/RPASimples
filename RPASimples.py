@@ -9,6 +9,8 @@ from win32api import GetKeyState
 from win32con import VK_CAPITAL
 import time
 import unicodedata
+import re
+import unicodedata
 
 #import logging
 #import logging.config
@@ -111,9 +113,28 @@ class robo():
         self._navegador.get(url)
         self.set_mensagem(f"Link acessado: {url}")
 
-    def click_elemento_web(self, xpath: str) -> any:
-        elemento = self._navegador.find_element_by_xpath(xpath).click()
-        self.set_mensagem(f"Elemento acessado xPath: {xpath}")
+    def escreva_gui(self, texto:str):        
+        gui.typewrite(texto, interval=0.1)
+
+    def click_elemento_web(self, xpath: str = "", nome_do_elemento : str = "") -> any:
+        if xpath != "":
+            elemento = self._navegador.find_element_by_xpath(xpath).click()
+            self.set_mensagem(f"Elemento acessado xPath: {xpath}")
+        elif nome_do_elemento != "":
+            elemento = self._navegador.find_element_by_name(nome_do_elemento).click()
+            self.set_mensagem(f"Elemento acessado xPath: {xpath}")            
+        else:
+             self.set_mensagem(f"Elemento sem XPATH ou Nome")   
+        return elemento
+
+    def combo_box_web(self, nome_do_elemento: str, texto_opcao_selecionada: str):
+        elemento = self._navegador.find_element_by_xpath(
+            f"//select[@name='{nome_do_elemento}']/option[text()='{texto_opcao_selecionada}']").click()
+        return elemento
+
+    def radio_box_web(self, nome_do_elemento: str, valor: str):
+        elemento = self._navegador.find_element_by_xpath(
+            ".//input[@type='{nome_do_elemento}' and @value='{valor}']").click()
         return elemento
 
     def entrar_dados_elemento_web(
@@ -181,6 +202,11 @@ class robo():
         gui.alert(text=self._mensagem,
                   title=self._titulo_dialogos, button='OK')
 
+    def mensagem(self):
+        self._interacao("MENSAGEM")
+        gui.alert(text=self._mensagem,
+                  title=self._titulo_dialogos, button='OK')
+
     def trabalho_concluido(self):
         self.set_mensagem("Mensagem de Alerta")
         gui.alert(text=self._mensagem,
@@ -193,12 +219,22 @@ class robo():
     def tecla_gui(self, tecla):
         gui.press(tecla)
 
-    def remover_acentos_caracteres_especiais(palavra):
+    def processar_conjuto_de_campos_web(self, campos: list):
 
-        # Unicode normalize transforma um caracter em seu equivalente em latin.
-        nfkd = unicodedata.normalize('NFKD', palavra)
-        palavraSemAcento = u"".join(
-            [c for c in nfkd if not unicodedata.combining(c)])
+        for campo in campos:
+            entrar_dados_elemento_web(
+                campo['xpath'], campo['dados'], campo['key_enter'], campo['key_tab'])
+            self.set_mensagem(
+                f"Digitar campo: {campo['nome']}, XPath: {campo['xpath']}, Dados {campo['dados']}")
 
-        # Usa expressão regular para retornar a palavra apenas com números, letras e espaço
-        return str(re.sub('[^a-zA-Z0-9 \\\]', '', palavraSemAcento))
+
+# funções auxiliares
+def remover_acentos_caracteres_especiais(palavra):
+
+    # Unicode normalize transforma um caracter em seu equivalente em latin.
+    nfkd = unicodedata.normalize('NFKD', palavra)
+    palavraSemAcento = u"".join(
+        [c for c in nfkd if not unicodedata.combining(c)])
+
+    # Usa expressão regular para retornar a palavra apenas com números, letras e espaço
+    return str(re.sub('[^a-zA-Z0-9 \\\]', '', palavraSemAcento))
