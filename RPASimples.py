@@ -11,6 +11,7 @@ import time
 import unicodedata
 import re
 import unicodedata
+import pandas as pd
 
 #import logging
 #import logging.config
@@ -124,7 +125,6 @@ class robo():
         x, y = gui.size()
         gui.moveTo(x-15, 15)
         gui.click()
-        self.espera(3)
 
     def fechar_navegador(self):
         gui.press("F11")
@@ -272,3 +272,10 @@ def remover_acentos_caracteres_especiais(palavra):
 
     # Usa expressão regular para retornar a palavra apenas com números, letras e espaço
     return str(re.sub('[^a-zA-Z0-9 \\\]', '', palavraSemAcento))
+
+
+def list_dict_para_excel(list_dict: dict, arquivo: str):
+    df = pd.DataFrame(list_dict)
+    writer = pd.ExcelWriter(arquivo, engine='xlsxwriter')
+    df.to_excel(writer, sheet_name='Sheet1', index=False)
+    writer.save()
