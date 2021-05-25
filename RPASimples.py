@@ -75,12 +75,14 @@ class robo():
         self.dir_arquivo_log_erros = self._dir_saida + \
             f"//ARQUIVO_LOG_RPA_PROCESSO_{nome_processo}_ERROS.txt"
 
-        self.arquivo_log = open(self.dir_arquivo_log, "w")
+        self.arquivo_log = open(self.dir_arquivo_log,
+                                mode="w", encoding="utf-8")
         linha = f"Arquivo de logging processo {self._nome}\n"
         self.arquivo_log.write(linha)
         self.arquivo_log.close()
 
-        self.arquivo_log_erros = open(self.dir_arquivo_log_erros, "w")
+        self.arquivo_log_erros = open(
+            self.dir_arquivo_log_erros, mode="w", encoding="utf-8")
         linha = f"Arquivo de falhas processo {self._nome}\n"
         self.arquivo_log_erros.write(linha)
         self.arquivo_log_erros.close()
@@ -207,7 +209,8 @@ class robo():
         agora = self._agora()
         txt_log = f"{agora} | {self._mensagem}\n"
 
-        self.arquivo_log = open(self.dir_arquivo_log, "a")
+        self.arquivo_log = open(self.dir_arquivo_log,
+                                mode="a", encoding="utf-8")
         self.arquivo_log.write(txt_log)
         self.arquivo_log.close()
 
@@ -240,7 +243,8 @@ class robo():
                 playsound(self.pathvoz_apresentacao+'apresentacao.mp3')
 
     def erro(self):
-        self.arquivo_log_erros = open(self.dir_arquivo_log_erros, "a")
+        self.arquivo_log_erros = open(
+            self.dir_arquivo_log_erros, mode="a", encoding="utf-8")
         linha = f"Arquivo de falhas processo {self._nome}\n"
         self.arquivo_log_erros.write(self._mensagem)
         self.arquivo_log_erros.close()
