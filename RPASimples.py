@@ -4,6 +4,7 @@ from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
+
 import sys
 from win32api import GetKeyState
 from win32con import VK_CAPITAL
@@ -11,6 +12,7 @@ import time
 import unicodedata
 import re
 import unicodedata
+import pandas as pd
 
 #import logging
 #import logging.config
@@ -39,6 +41,9 @@ class robo():
     pathlog: str = './LOG/'
     voz: any
     arquivo_log: any
+    arquivo_log_erros: any
+    dir_arquivo_log: str
+    dir_arquivo_log_erros: str
 
     def __init__(self, nome: str, resolucao_x: int,
                  resolucao_y: int, pathvoz_apresentacao: str,
@@ -67,10 +72,20 @@ class robo():
         self.dir_arquivo_log = self._dir_saida + \
             f"//ARQUIVO_LOG_RPA_PROCESSO_{nome_processo}.txt"
 
-        self.arquivo_log = open(self.dir_arquivo_log, "w")
+        self.dir_arquivo_log_erros = self._dir_saida + \
+            f"//ARQUIVO_LOG_RPA_PROCESSO_{nome_processo}_ERROS.txt"
+
+        self.arquivo_log = open(self.dir_arquivo_log,
+                                mode="w", encoding="utf-8")
         linha = f"Arquivo de logging processo {self._nome}\n"
         self.arquivo_log.write(linha)
         self.arquivo_log.close()
+
+        self.arquivo_log_erros = open(
+            self.dir_arquivo_log_erros, mode="w", encoding="utf-8")
+        linha = f"Arquivo de falhas processo {self._nome}\n"
+        self.arquivo_log_erros.write(linha)
+        self.arquivo_log_erros.close()
 
         self.set_mensagem("\n\nRPA ativado")
         assistencia = gui.confirm(text=f'Deseja manter a assistência por voz da {self._nome}?',
@@ -83,8 +98,7 @@ class robo():
 
         self.set_mensagem("Apresentação")
         self._interacao("APRESENTACAO")
-        mensagem = """ATENÇÃO!!!  INICIANDO O RPA DE LANÇAMENTO {nome}
-        VOCÊ TERÁ 10 SEGUNDOS PARA SE PREPARAR E USAR O COMPUTADOR ATÉ O FINAL DA EXECUÇÃO"""
+        mensagem = """ATENÇÃO!!!  INICIANDO O RPA  {self._nome} E TERÁ 10 SEGUNDOS PARA SE PREPARAR E USAR O COMPUTADOR ATÉ O FINAL DA EXECUÇÃO"""
         self.set_mensagem(mensagem)
 
         gui.alert(text=self._mensagem,
@@ -116,6 +130,7 @@ class robo():
             "excludeSwitches", ['enable-automation'])
 
         drive = f'{self.path_webdriver}chromedriver.exe'
+
         self._navegador = webdriver.Chrome(
             executable_path=drive,
             options=chrome_options)
@@ -124,13 +139,14 @@ class robo():
         x, y = gui.size()
         gui.moveTo(x-15, 15)
         gui.click()
-        self.espera(3)
 
     def fechar_navegador(self):
         gui.press("F11")
-        # gui.hotkey('alt', 'f4')
-        self._navegador.close()
-        self._navegador.quit()
+
+        if self._navegador:
+            self._navegador.close()
+            self._navegador.quit()
+
         self.set_mensagem("Navegador fechado")
 
     def abrir_link(self, url: str):
@@ -193,7 +209,8 @@ class robo():
         agora = self._agora()
         txt_log = f"{agora} | {self._mensagem}\n"
 
-        self.arquivo_log = open(self.dir_arquivo_log, "a")
+        self.arquivo_log = open(self.dir_arquivo_log,
+                                mode="a", encoding="utf-8")
         self.arquivo_log.write(txt_log)
         self.arquivo_log.close()
 
@@ -226,9 +243,11 @@ class robo():
                 playsound(self.pathvoz_apresentacao+'apresentacao.mp3')
 
     def erro(self):
-        self._interacao("ERRO")
-        gui.alert(text=self._mensagem,
-                  title=self._titulo_dialogos, button='OK')
+        self.arquivo_log_erros = open(
+            self.dir_arquivo_log_erros, mode="a", encoding="utf-8")
+        linha = f"Arquivo de falhas processo {self._nome}\n"
+        self.arquivo_log_erros.write(self._mensagem)
+        self.arquivo_log_erros.close()
 
     def atencao(self):
         self._interacao("ATENCAO")
@@ -272,3 +291,10 @@ def remover_acentos_caracteres_especiais(palavra):
 
     # Usa expressão regular para retornar a palavra apenas com números, letras e espaço
     return str(re.sub('[^a-zA-Z0-9 \\\]', '', palavraSemAcento))
+
+
+def list_dict_para_excel(list_dict: dict, arquivo: str):
+    df = pd.DataFrame(list_dict)
+    writer = pd.ExcelWriter(arquivo, engine='xlsxwriter')
+    df.to_excel(writer, sheet_name='Sheet1', index=False)
+    writer.save()
