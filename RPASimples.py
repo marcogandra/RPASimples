@@ -14,8 +14,8 @@ import re
 import unicodedata
 import pandas as pd
 
-#import logging
-#import logging.config
+# import logging
+# import logging.config
 
 """[summary]
 
@@ -26,7 +26,7 @@ Returns:
 
 class robo():
     _mensagem: str
-    _falante: bool = True
+    _falante: bool = False
     _titulo_dialogos: str = "SISTEMA RPA"
     _navegador: any
     _nome: str
@@ -48,10 +48,13 @@ class robo():
     def __init__(self, nome: str, resolucao_x: int,
                  resolucao_y: int, pathvoz_apresentacao: str,
                  path_webdriver, dir_saida: str = "./",
-                 nome_processo: str = ""):
-
+                 nome_processo: str = "",
+                 pasta_de_downloads: str = "/Downloads"):
+        
+        gui.FAILSAFE = False
         self.pathvoz_apresentacao = pathvoz_apresentacao
         self.path_webdriver = path_webdriver
+        self.pasta_de_downloads = pasta_de_downloads
 
         screenX, screenY = gui.size()
         if (screenX != resolucao_x or screenY != resolucao_y) and (resolucao_x != 0 and screenY != 0):
@@ -92,7 +95,8 @@ class robo():
                                   title=f"{self._titulo_dialogos} - {nome}", buttons=['Sim', 'Não'])
 
         if assistencia == 'Sim':
-            self._falante = True
+            pass
+            # self._falante = True
         else:
             self._falante = False
 
@@ -128,6 +132,15 @@ class robo():
         chrome_options.add_argument('--disable-notifications')
         chrome_options.add_experimental_option(
             "excludeSwitches", ['enable-automation'])
+
+        #dir_downlaod = "D:\Downloads"
+        chrome_options.add_experimental_option('prefs', {
+            "plugins.plugins_list": [{"enabled": False, "name": "Chrome PDF Viewer"}],
+            "download": {
+                "prompt_for_download": False,
+                "default_directory": self.pasta_de_downloads
+            }
+        })
 
         drive = f'{self.path_webdriver}chromedriver.exe'
 
@@ -216,7 +229,8 @@ class robo():
 
     def bip(self, repetir):
         for i in range(repetir):
-            playsound(self.pathvoz+'bip.mp3')
+            pass
+            # playsound(self.pathvoz+'bip.mp3')
 
     def _interacao(self, envento: str):
         hora = datetime.now()
@@ -225,22 +239,27 @@ class robo():
         if self._falante:
             if envento == "APRESENTACAO":
                 if hora > 0 and hora < 12:
-                    playsound(self.pathvoz+'bomdia.mp3')
+                    pass
+                    # playsound(self.pathvoz+'bomdia.mp3')
 
                     if hora > 6 and hora < 9:
-                        playsound(self.pathvoz +
-                                  'esperoqueocafedamanhatenhasidobom.mp3')
+                        pass
+                        # playsound(self.pathvoz +
+                        #          'esperoqueocafedamanhatenhasidobom.mp3')
 
                 elif hora >= 12 and hora < 18:
-                    playsound(self.pathvoz+'boatarde.mp3')
+                    pass
+                    # playsound(self.pathvoz+'boatarde.mp3')
 
                     if hora >= 13 and hora < 14:
-                        playsound(self.pathvoz+'esperoquejatenhaalmocado.mp3')
+                        pass
+                        # playsound(self.pathvoz+'esperoquejatenhaalmocado.mp3')
 
                 else:
-                    playsound(self.pathvoz+'boanoite.mp3')
+                    pass
+                    # playsound(self.pathvoz+'boanoite.mp3')
 
-                playsound(self.pathvoz_apresentacao+'apresentacao.mp3')
+                # playsound(self.pathvoz_apresentacao+'apresentacao.mp3')
 
     def erro(self):
         self.arquivo_log_erros = open(
